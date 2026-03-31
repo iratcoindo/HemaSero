@@ -190,6 +190,58 @@ if len(df_list) > 0:
                 low, high = parse_range(val)
     
                 range_dict[param] = (low, high)
+                # ===============================
+                # 🚨 OUT OF RANGE (DETAIL)
+                # ===============================
+                st.markdown("---")
+                st.subheader("🚨 Out of Range (Per Group × Timepoint)")
+                
+                results = []
+                
+                parameters = df_all["Parameter"].unique()
+                groups = df_all["Group"].dropna().unique()
+                timepoints = ["Baseline", "Midline", "Endline"]
+                
+                for param in parameters:
+                
+                    low, high = range_dict.get(param, (None, None))
+                
+                    if low is None or high is None:
+                        continue
+                
+                    for g in groups:
+                        for tp in timepoints:
+                
+                            df_sub = df_all[
+                                (df_all["Parameter"] == param) &
+                                (df_all["Group"] == g) &
+                                (df_all["Timepoint"] == tp)
+                            ]
+                
+                            vals = df_sub["Value"].dropna()
+                
+                            if len(vals) == 0:
+                                continue
+                
+                            below = vals[vals < low]
+                            above = vals[vals > high]
+                
+                            results.append({
+                                "Parameter": param,
+                                "Group": g,
+                                "Timepoint": tp,
+                                "n": len(vals),
+                                "Below": len(below),
+                                "Above": len(above),
+                                "Out of Range": len(below) + len(above)
+                            })
+
+                    # ===============================
+                    # TABLE
+                    # ===============================
+                    result_df = pd.DataFrame(results)
+                    
+                    st.dataframe(result_df, use_container_width=True)
 
     # ===============================
     # 📦 MINI BOXPLOT (CLEAN STYLE)
