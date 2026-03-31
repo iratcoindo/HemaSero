@@ -239,9 +239,5 @@ for i in range(0, len(parameters), cols_per_row):
 
                 st.pyplot(fig)
 
-            else:
-                st.write(param)
-       
-    
     else:
         st.info("Silakan upload minimal data baseline")
