@@ -83,7 +83,46 @@ if len(df_list) > 0:
 
     df_all = pd.concat(df_list, ignore_index=True)
 
-    st.subheader("📋 Combined Data")
+    # ===============================
+    # 🧪 GROUP ASSIGNMENT
+    # ===============================
+    st.markdown("---")
+    st.subheader("🧬 Assign Sample Groups")
+    
+    unique_samples = sorted(df_all["Sample"].unique())
+    
+    st.write("Detected samples:", unique_samples)
+    
+    # jumlah group
+    n_group = st.number_input("Jumlah kelompok", min_value=1, max_value=10, value=2)
+    
+    group_map = {}
+    
+    for i in range(n_group):
+        col1, col2 = st.columns([1,3])
+    
+        with col1:
+            group_name = st.text_input(f"Group {i+1} Name", f"Group {i+1}", key=f"gname{i}")
+    
+        with col2:
+            selected_samples = st.multiselect(
+                f"Pilih sample untuk {group_name}",
+                unique_samples,
+                key=f"gsample{i}"
+            )
+    
+        for s in selected_samples:
+            group_map[s] = group_name
+    
+    # ===============================
+    # APPLY GROUP
+    # ===============================
+    df_all["Group"] = df_all["Sample"].map(group_map)
+    
+    # ===============================
+    # PREVIEW
+    # ===============================
+    st.subheader("📋 Grouped Data")
     st.dataframe(df_all)
 
     # ===============================
