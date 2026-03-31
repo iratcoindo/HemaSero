@@ -150,7 +150,7 @@ if len(df_list) > 0:
     st.write("Timepoints:", df_all["Timepoint"].unique())
 
     # ===============================
-    # 📏 COMPACT REFERENCE RANGE
+    # 📏 COMPACT RANGE (1 INPUT)
     # ===============================
     st.markdown("---")
     st.subheader("📏 Reference Range")
@@ -160,6 +160,14 @@ if len(df_list) > 0:
     range_dict = {}
     
     cols_per_row = 4
+    
+    # parser function
+    def parse_range(text):
+        try:
+            low, high = text.split("-")
+            return float(low), float(high)
+        except:
+            return None, None
     
     for i in range(0, len(parameters), cols_per_row):
     
@@ -172,21 +180,14 @@ if len(df_list) > 0:
     
                 st.markdown(f"**{param}**")
     
-                low = st.number_input(
-                    "Low",
-                    value=0.0,
-                    step=0.1,
-                    key=f"low_{param}",
+                val = st.text_input(
+                    "range",
+                    value="",
+                    key=f"range_{param}",
                     label_visibility="collapsed"
                 )
     
-                high = st.number_input(
-                    "High",
-                    value=0.0,
-                    step=0.1,
-                    key=f"high_{param}",
-                    label_visibility="collapsed"
-                )
+                low, high = parse_range(val)
     
                 range_dict[param] = (low, high)
 
