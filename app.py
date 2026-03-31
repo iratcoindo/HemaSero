@@ -83,11 +83,8 @@ if len(df_list) > 0:
     # ===============================
     # 🧬 GROUP ASSIGNMENT (RANGE INPUT)
     # ===============================
-    st.markdown("---")
-    st.subheader("🧪 Assign Group by Range")
     
     unique_samples = sorted(df_all["Sample"].unique())
-    st.write("Detected samples:", unique_samples)
     
     # fungsi parser
     def parse_range(text):
