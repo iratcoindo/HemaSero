@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 st.title("📊 Hematology Data Input")
 
@@ -98,9 +100,6 @@ if len(df_list) > 0:
 # ===============================
 st.markdown("---")
 st.subheader("📦 Hematology Boxplot (Per Parameter)")
-
-import matplotlib.pyplot as plt
-import numpy as np
 
 parameters = df_all["Parameter"].unique()
 
