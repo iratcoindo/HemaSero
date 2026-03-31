@@ -246,6 +246,102 @@ if len(df_list) > 0:
         st.info("Belum ada data atau range belum diisi")
 
     # ===============================
+    # 📊 STATISTICAL TEST (BASELINE)
+    # ===============================
+    from scipy.stats import kruskal, mannwhitneyu
+    
+    st.markdown("---")
+    st.subheader("📊 Statistical Test (Baseline)")
+    
+    # filter baseline saja
+    df_base = df_all[df_all["Timepoint"] == "Baseline"]
+    
+    if df_base.empty:
+        st.info("Tidak ada data baseline")
+    else:
+    
+        # pilih reference group
+        groups = sorted(df_base["Group"].dropna().unique())
+        ref_group = st.selectbox("Reference Group", groups)
+    
+        results = []
+    
+        for param in df_base["Parameter"].unique():
+    
+            df_param = df_base[df_base["Parameter"] == param]
+    
+            # kumpulkan data per group
+            group_data = []
+            group_labels = []
+    
+            for g in groups:
+                vals = df_param[df_param["Group"] == g]["Value"].dropna()
+                if len(vals) > 0:
+                    group_data.append(vals)
+                    group_labels.append(g)
+    
+            # ===============================
+            # KRUSKAL WALLIS
+            # ===============================
+            if len(group_data) >= 2:
+    
+                try:
+                    stat, p_kw = kruskal(*group_data)
+                except:
+                    p_kw = np.nan
+    
+                # ===============================
+                # POSTHOC vs REFERENCE
+                # ===============================
+                posthoc_results = {}
+    
+                if p_kw < 0.05:
+    
+                    ref_vals = df_param[df_param["Group"] == ref_group]["Value"].dropna()
+    
+                    for g in group_labels:
+                        if g == ref_group:
+                            continue
+    
+                        vals = df_param[df_param["Group"] == g]["Value"].dropna()
+    
+                        if len(vals) > 0 and len(ref_vals) > 0:
+                            try:
+                                _, p_post = mannwhitneyu(ref_vals, vals, alternative='two-sided')
+                            except:
+                                p_post = np.nan
+    
+                            # ⭐ SIGNIFICANCE STAR
+                            if p_post < 0.001:
+                                star = "***"
+                            elif p_post < 0.01:
+                                star = "**"
+                            elif p_post < 0.05:
+                                star = "*"
+                            else:
+                                star = ""
+    
+                            posthoc_results[g] = f"{p_post:.4f} {star}"
+    
+                results.append({
+                    "Parameter": param,
+                    "Kruskal p": round(p_kw, 4) if not np.isnan(p_kw) else np.nan,
+                    "Posthoc vs " + ref_group: posthoc_results
+                })
+        
+        # ===============================
+        # DISPLAY
+        # ===============================
+        if len(results) > 0:
+        
+            result_df = pd.DataFrame(results)
+        
+            st.dataframe(result_df, use_container_width=True)
+        
+        else:
+            st.info("Tidak ada data yang bisa dianalisis")
+
+    # ===============================
     # 📦 MINI BOXPLOT (CLEAN STYLE)
     # ===============================
     st.markdown("---")
@@ -339,101 +435,7 @@ if len(df_list) > 0:
                     ax.spines['right'].set_visible(False)
     
                     st.pyplot(fig)
-        # ===============================
-        # 📊 STATISTICAL TEST (BASELINE)
-        # ===============================
-        from scipy.stats import kruskal, mannwhitneyu
         
-        st.markdown("---")
-        st.subheader("📊 Statistical Test (Baseline)")
-        
-        # filter baseline saja
-        df_base = df_all[df_all["Timepoint"] == "Baseline"]
-        
-        if df_base.empty:
-            st.info("Tidak ada data baseline")
-        else:
-        
-            # pilih reference group
-            groups = sorted(df_base["Group"].dropna().unique())
-            ref_group = st.selectbox("Reference Group", groups)
-        
-            results = []
-        
-            for param in df_base["Parameter"].unique():
-        
-                df_param = df_base[df_base["Parameter"] == param]
-        
-                # kumpulkan data per group
-                group_data = []
-                group_labels = []
-        
-                for g in groups:
-                    vals = df_param[df_param["Group"] == g]["Value"].dropna()
-                    if len(vals) > 0:
-                        group_data.append(vals)
-                        group_labels.append(g)
-        
-                # ===============================
-                # KRUSKAL WALLIS
-                # ===============================
-                if len(group_data) >= 2:
-        
-                    try:
-                        stat, p_kw = kruskal(*group_data)
-                    except:
-                        p_kw = np.nan
-        
-                    # ===============================
-                    # POSTHOC vs REFERENCE
-                    # ===============================
-                    posthoc_results = {}
-        
-                    if p_kw < 0.05:
-        
-                        ref_vals = df_param[df_param["Group"] == ref_group]["Value"].dropna()
-        
-                        for g in group_labels:
-                            if g == ref_group:
-                                continue
-        
-                            vals = df_param[df_param["Group"] == g]["Value"].dropna()
-        
-                            if len(vals) > 0 and len(ref_vals) > 0:
-                                try:
-                                    _, p_post = mannwhitneyu(ref_vals, vals, alternative='two-sided')
-                                except:
-                                    p_post = np.nan
-        
-                                # ⭐ SIGNIFICANCE STAR
-                                if p_post < 0.001:
-                                    star = "***"
-                                elif p_post < 0.01:
-                                    star = "**"
-                                elif p_post < 0.05:
-                                    star = "*"
-                                else:
-                                    star = ""
-        
-                                posthoc_results[g] = f"{p_post:.4f} {star}"
-        
-                    results.append({
-                        "Parameter": param,
-                        "Kruskal p": round(p_kw, 4) if not np.isnan(p_kw) else np.nan,
-                        "Posthoc vs " + ref_group: posthoc_results
-                    })
-        
-        # ===============================
-        # DISPLAY
-        # ===============================
-        if len(results) > 0:
-        
-            result_df = pd.DataFrame(results)
-        
-            st.dataframe(result_df, use_container_width=True)
-        
-        else:
-            st.info("Tidak ada data yang bisa dianalisis")
 
     else:
         st.info("Silakan upload minimal data baseline")
