@@ -60,147 +60,135 @@ def load_data(file, label):
     
     return df_long
 
-# ===============================
-# LOAD ALL
-# ===============================
-df_list = []
-
-df_baseline = load_data(baseline_file, "Baseline")
-df_midline  = load_data(midline_file, "Midline")
-df_endline  = load_data(endline_file, "Endline")
-
-for df in [df_baseline, df_midline, df_endline]:
-    if df is not None:
-        df_list.append(df)
-
-# ===============================
-# COMBINE
-# ===============================
-if len(df_list) > 0:
-
-    df_all = pd.concat(df_list, ignore_index=True)
-
     # ===============================
-    # 🧬 GROUP ASSIGNMENT (RANGE INPUT)
+    # LOAD ALL
     # ===============================
+    df_list = []
     
-    unique_samples = sorted(df_all["Sample"].unique())
+    df_baseline = load_data(baseline_file, "Baseline")
+    df_midline  = load_data(midline_file, "Midline")
+    df_endline  = load_data(endline_file, "Endline")
     
-    # fungsi parser
-    def parse_range(text):
-        samples = []
-        parts = text.split(",")
-    
-        for p in parts:
-            p = p.strip()
-            if "-" in p:
-                start, end = p.split("-")
-                samples += [str(i) for i in range(int(start), int(end)+1)]
-            elif p != "":
-                samples.append(p)
-        return samples
-    
-    # jumlah group
-    n_group = st.number_input("Jumlah kelompok", 1, 10, 2)
-    
-    group_map = {}
-    
-    for i in range(n_group):
-        col1, col2 = st.columns(2)
-    
-        with col1:
-            gname = st.text_input(f"Nama Group {i+1}", f"Group {i+1}", key=f"gname{i}")
-    
-        with col2:
-            grange = st.text_input(
-                f"Range Sample (contoh: 1-5 atau 1-3,5,7-9)",
-                key=f"grange{i}"
-            )
-    
-        try:
-            parsed = parse_range(grange)
-    
-            for p in parsed:
-                # 🔥 cocokkan dengan sample name
-                for s in unique_samples:
-                    if s.endswith(str(p)):   # fleksibel (S1, ID_1, dll)
-                        group_map[s] = gname
-    
-        except:
-            st.warning(f"Format salah di Group {i+1}")
+    for df in [df_baseline, df_midline, df_endline]:
+        if df is not None:
+            df_list.append(df)
     
     # ===============================
-    # APPLY GROUP
+    # COMBINE
     # ===============================
-    df_all["Group"] = df_all["Sample"].map(group_map)
+    if len(df_list) > 0:
     
-    # ===============================
-    # PREVIEW
-    # ===============================
-    st.subheader("📋 Group Mapping")
-    st.dataframe(df_all[["Sample","Group"]].drop_duplicates())
-
-    # ===============================
-    # INFO DETECTION
-    # ===============================
-    st.subheader("🔍 Detected Structure")
-
-    st.write("Jumlah sample:", df_all["Sample"].nunique())
-    st.write("Jumlah parameter:", df_all["Parameter"].nunique())
-    st.write("Timepoints:", df_all["Timepoint"].unique())
-
-    # ===============================
-    # 📊 SAFE BOXPLOT
-    # ===============================
-    df_param = df_all[df_all["Parameter"] == param]
+        df_all = pd.concat(df_list, ignore_index=True)
     
-    box_data = []
-    box_colors = []
-    labels = []
+        # ===============================
+        # 🧬 GROUP ASSIGNMENT (RANGE INPUT)
+        # ===============================
+        
+        unique_samples = sorted(df_all["Sample"].unique())
+        
+        # fungsi parser
+        def parse_range(text):
+            samples = []
+            parts = text.split(",")
+        
+            for p in parts:
+                p = p.strip()
+                if "-" in p:
+                    start, end = p.split("-")
+                    samples += [str(i) for i in range(int(start), int(end)+1)]
+                elif p != "":
+                    samples.append(p)
+            return samples
+        
+        # jumlah group
+        n_group = st.number_input("Jumlah kelompok", 1, 10, 2)
+        
+        group_map = {}
+        
+        for i in range(n_group):
+            col1, col2 = st.columns(2)
+        
+            with col1:
+                gname = st.text_input(f"Nama Group {i+1}", f"Group {i+1}", key=f"gname{i}")
+        
+            with col2:
+                grange = st.text_input(
+                    f"Range Sample (contoh: 1-5 atau 1-3,5,7-9)",
+                    key=f"grange{i}"
+                )
+        
+            try:
+                parsed = parse_range(grange)
+        
+                for p in parsed:
+                    # 🔥 cocokkan dengan sample name
+                    for s in unique_samples:
+                        if s.endswith(str(p)):   # fleksibel (S1, ID_1, dll)
+                            group_map[s] = gname
+        
+            except:
+                st.warning(f"Format salah di Group {i+1}")
+        
+        # ===============================
+        # APPLY GROUP
+        # ===============================
+        df_all["Group"] = df_all["Sample"].map(group_map)
+        
+        # ===============================
+        # PREVIEW
+        # ===============================
+        st.subheader("📋 Group Mapping")
+        st.dataframe(df_all[["Sample","Group"]].drop_duplicates())
     
-    groups_unique = df_all["Group"].dropna().unique()
-    timepoints = ["Baseline", "Midline", "Endline"]
+        # ===============================
+        # INFO DETECTION
+        # ===============================
+        st.subheader("🔍 Detected Structure")
     
-    for g in groups_unique:
-        for tp in timepoints:
+        st.write("Jumlah sample:", df_all["Sample"].nunique())
+        st.write("Jumlah parameter:", df_all["Parameter"].nunique())
+        st.write("Timepoints:", df_all["Timepoint"].unique())
     
-            vals = df_param[
-                (df_param["Group"] == g) &
-                (df_param["Timepoint"] == tp)
-            ]["Value"].dropna()
+        # ===============================
+        # 📦 BOXPLOT PER PARAMETER
+        # ===============================
+        st.markdown("---")
+        st.subheader("📦 Hematology Boxplot")
+        
+        parameters = df_all["Parameter"].unique()
+        
+        for param in parameters:
+        
+            df_param = df_all[df_all["Parameter"] == param]
+        
+            box_data = []
+            labels = []
+        
+            for g in df_all["Group"].dropna().unique():
+                for tp in ["Baseline", "Midline", "Endline"]:
+        
+                    vals = df_param[
+                        (df_param["Group"] == g) &
+                        (df_param["Timepoint"] == tp)
+                    ]["Value"].dropna()
+        
+                    if len(vals) > 0:
+                        box_data.append(vals.values)
+                        labels.append(f"{g}-{tp}")
+        
+            if len(box_data) > 0:
+        
+                fig, ax = plt.subplots(figsize=(3,2.5))
+        
+                ax.boxplot(box_data)
+        
+                ax.set_xticks(range(1, len(labels)+1))
+                ax.set_xticklabels(labels, rotation=45, fontsize=6)
+        
+                ax.set_title(param, fontsize=9)
+        
+                st.pyplot(fig)
+       
     
-            if len(vals) > 0:
-                box_data.append(vals.values)  # 🔥 penting pakai .values
-                box_colors.append(colors.get(tp, "gray"))
-                labels.append(f"{g}\n{tp}")
-    
-    # ===============================
-    # PLOT
-    # ===============================
-    if len(box_data) > 0:
-    
-        fig, ax = plt.subplots(figsize=(2.5,2.5))
-    
-        bp = ax.boxplot(
-            box_data,
-            patch_artist=True
-        )
-    
-        # warna
-        for patch, color in zip(bp["boxes"], box_colors):
-            patch.set_facecolor(color)
-    
-        ax.set_xticks(range(1, len(labels)+1))
-        ax.set_xticklabels(labels, fontsize=6)
-    
-        ax.set_title(param, fontsize=8)
-        ax.tick_params(axis='y', labelsize=6)
-    
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-    
-        st.pyplot(fig)
-   
-
-else:
-    st.info("Silakan upload minimal data baseline")
+    else:
+        st.info("Silakan upload minimal data baseline")
