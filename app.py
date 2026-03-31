@@ -153,97 +153,44 @@ if len(df_list) > 0:
     st.write("Timepoints:", df_all["Timepoint"].unique())
 
     # ===============================
-    # 📊 BOXPLOT GROUP + TIMEPOINT
+    # SAFE BOXPLOT (NO POSITIONS)
     # ===============================
-    st.markdown("---")
-    st.subheader("📦 Hematology Boxplot (Group × Timepoint)")
+    box_data = []
+    box_colors = []
+    labels = []
     
-    import matplotlib.pyplot as plt
-    import numpy as np
+    for g in df_all["Group"].dropna().unique():
+        for tp in ["Baseline", "Midline", "Endline"]:
     
-    parameters = df_all["Parameter"].unique()
-    groups_unique = df_all["Group"].dropna().unique()
-    timepoints = ["Baseline", "Midline", "Endline"]
+            vals = df_param[
+                (df_param["Group"] == g) &
+                (df_param["Timepoint"] == tp)
+            ]["Value"].dropna()
     
-    # warna timepoint
-    colors = {
-        "Baseline": "#3b82f6",   # biru
-        "Midline": "#10b981",    # hijau
-        "Endline": "#ef4444"     # merah
-    }
+            if len(vals) > 0:
+                box_data.append(vals)
+                box_colors.append(colors[tp])
+                labels.append(f"{g}-{tp}")
     
-    cols_per_row = 6
+    if len(box_data) > 0:
     
-    for i in range(0, len(parameters), cols_per_row):
+        fig, ax = plt.subplots(figsize=(2.5,2.5))
     
-        subset_params = parameters[i:i+cols_per_row]
-        cols = st.columns(len(subset_params))
+        bp = ax.boxplot(
+            box_data,
+            patch_artist=True
+        )
     
-        for j, param in enumerate(subset_params):
+        # warna
+        for patch, color in zip(bp["boxes"], box_colors):
+            patch.set_facecolor(color)
     
-            with cols[j]:
+        ax.set_xticks(range(1, len(labels)+1))
+        ax.set_xticklabels(labels, rotation=45, fontsize=6)
     
-                df_param = df_all[df_all["Parameter"] == param]
+        ax.set_title(param, fontsize=8)
     
-                fig, ax = plt.subplots(figsize=(2.5,2.5))
-    
-                positions = []
-                box_data = []
-                box_colors = []
-    
-                pos = 0
-    
-                for g in groups_unique:
-    
-                    for tp in timepoints:
-    
-                        vals = df_param[
-                            (df_param["Group"] == g) &
-                            (df_param["Timepoint"] == tp)
-                        ]["Value"].dropna()
-    
-                        if len(vals) > 0:
-                            box_data.append(vals)
-                            positions.append(pos)
-                            box_colors.append(colors[tp])
-    
-                            pos += 1
-    
-                    pos += 1  # jarak antar group
-    
-                # plot
-                bp = ax.boxplot(
-                    box_data,
-                    positions=positions,
-                    widths=0.6,
-                    patch_artist=True
-                )
-    
-                # warna
-                for patch, color in zip(bp["boxes"], box_colors):
-                    patch.set_facecolor(color)
-    
-                # label group di tengah cluster
-                xticks = []
-                xticklabels = []
-    
-                pos = 0
-                for g in groups_unique:
-                    xticks.append(pos + 1)
-                    xticklabels.append(g)
-                    pos += len(timepoints) + 1
-    
-                ax.set_xticks(xticks)
-                ax.set_xticklabels(xticklabels, fontsize=6)
-    
-                ax.set_title(param, fontsize=8)
-    
-                ax.tick_params(axis='y', labelsize=6)
-    
-                ax.spines['top'].set_visible(False)
-                ax.spines['right'].set_visible(False)
-    
-                st.pyplot(fig)
+        st.pyplot(fig)
     # ===============================
     # 📊 STATISTICAL TEST (AUTO)
     # ===============================
