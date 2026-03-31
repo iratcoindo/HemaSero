@@ -204,8 +204,10 @@ if len(df_list) > 0:
                 
                         if len(vals) > 0:
                             box_data.append(vals)
-                            positions.append(len(box_data))  # 🔥 selalu sinkron
+                            positions.append(pos)
                             box_colors.append(colors[tp])
+                
+                            pos += 1
                 
                     pos += 1
     
