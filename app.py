@@ -263,53 +263,53 @@ if len(df_list) > 0:
                     ax.spines['right'].set_visible(False)
     
                     st.pyplot(fig)
-        # ===============================
-        # 📊 OUT OF RANGE ANALYSIS
-        # ===============================
-        st.markdown("---")
-        st.subheader("🚨 Out of Range Analysis")
-        
-        results = []
-        
-        for param in parameters:
-        
-            df_param = df_all[df_all["Parameter"] == param]
-        
-            low, high = range_dict.get(param, (None, None))
-        
-            if low is None or high is None:
-                continue
-        
-            values = df_param["Value"].dropna()
-        
-            if len(values) == 0:
-                continue
-        
-            below = values[values < low]
-            above = values[values > high]
-        
-            total = len(values)
-        
-            # persen out of range
-            pct_below = len(below) / total * 100
-            pct_above = len(above) / total * 100
-        
-            # deviasi %
-            below_dev = ((low - below) / low * 100).mean() if len(below) > 0 else 0
-            above_dev = ((above - high) / high * 100).mean() if len(above) > 0 else 0
-        
-            results.append({
-                "Parameter": param,
-                "Total n": total,
-                "Below Count": len(below),
-                "Below (%)": round(pct_below, 2),
-                "Below Deviation (%)": round(below_dev, 2),
-                "Above Count": len(above),
-                "Above (%)": round(pct_above, 2),
-                "Above Deviation (%)": round(above_dev, 2)
-            })
-        
-        result_df = pd.DataFrame(results)
+    # ===============================
+    # 📊 OUT OF RANGE ANALYSIS
+    # ===============================
+    st.markdown("---")
+    st.subheader("🚨 Out of Range Analysis")
+    
+    results = []
+    
+    for param in parameters:
+    
+        df_param = df_all[df_all["Parameter"] == param]
+    
+        low, high = range_dict.get(param, (None, None))
+    
+        if low is None or high is None:
+            continue
+    
+        values = df_param["Value"].dropna()
+    
+        if len(values) == 0:
+            continue
+    
+        below = values[values < low]
+        above = values[values > high]
+    
+        total = len(values)
+    
+        # persen out of range
+        pct_below = len(below) / total * 100
+        pct_above = len(above) / total * 100
+    
+        # deviasi %
+        below_dev = ((low - below) / low * 100).mean() if len(below) > 0 else 0
+        above_dev = ((above - high) / high * 100).mean() if len(above) > 0 else 0
+    
+        results.append({
+            "Parameter": param,
+            "Total n": total,
+            "Below Count": len(below),
+            "Below (%)": round(pct_below, 2),
+            "Below Deviation (%)": round(below_dev, 2),
+            "Above Count": len(above),
+            "Above (%)": round(pct_above, 2),
+            "Above Deviation (%)": round(above_dev, 2)
+        })
+    
+    result_df = pd.DataFrame(results)
         
         st.dataframe(result_df, use_container_width=True)
 
