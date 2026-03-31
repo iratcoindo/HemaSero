@@ -200,9 +200,6 @@ if len(df_list) > 0:
         ax.spines['right'].set_visible(False)
     
         st.pyplot(fig)
-    
-    else:
-        st.warning(f"{param}: No data to plot")
    
 
 else:
