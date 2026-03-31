@@ -150,24 +150,45 @@ if len(df_list) > 0:
     st.write("Timepoints:", df_all["Timepoint"].unique())
 
     # ===============================
-    # 🧪 REFERENCE RANGE INPUT
+    # 📏 COMPACT REFERENCE RANGE
     # ===============================
     st.markdown("---")
     st.subheader("📏 Reference Range")
     
-    range_dict = {}
-    
     parameters = df_all["Parameter"].unique()
     
-    for param in parameters:
-        col1, col2 = st.columns(2)
+    range_dict = {}
     
-        with col1:
-            low = st.number_input(f"{param} Lower", value=0.0, key=f"low_{param}")
-        with col2:
-            high = st.number_input(f"{param} Upper", value=0.0, key=f"high_{param}")
+    cols_per_row = 4
     
-        range_dict[param] = (low, high)
+    for i in range(0, len(parameters), cols_per_row):
+    
+        subset = parameters[i:i+cols_per_row]
+        cols = st.columns(len(subset))
+    
+        for j, param in enumerate(subset):
+    
+            with cols[j]:
+    
+                st.markdown(f"**{param}**")
+    
+                low = st.number_input(
+                    "Low",
+                    value=0.0,
+                    step=0.1,
+                    key=f"low_{param}",
+                    label_visibility="collapsed"
+                )
+    
+                high = st.number_input(
+                    "High",
+                    value=0.0,
+                    step=0.1,
+                    key=f"high_{param}",
+                    label_visibility="collapsed"
+                )
+    
+                range_dict[param] = (low, high)
 
     # ===============================
     # 📦 MINI BOXPLOT (CLEAN STYLE)
