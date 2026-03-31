@@ -17,6 +17,7 @@ endline_file  = col3.file_uploader("Endline", type=["xlsx","csv"])
 # ===============================
 # FUNCTION LOAD
 # ===============================
+
 def load_data(file, label):
     if file is None:
         return None
@@ -26,36 +27,27 @@ def load_data(file, label):
     else:
         df = pd.read_csv(file)
 
-    def load_data(file, label):
-        if file is None:
-            return None
-        
-        if file.name.endswith(".xlsx"):
-            df = pd.read_excel(file)
-        else:
-            df = pd.read_csv(file)
-    
-        # ===============================
-        # 🔥 FILTER PARAMETER HEMATOLOGI
-        # ===============================
-        hematology_params = ["	WBC","	Neu#","	Lym#","	Mon#","	Eos#","	Bas#","	Neu%","	Lym%","	Mon%","	Eos%","	Bas%","	RBC",
-                             "	HGB","	HCT","	MCV","	MCH","	MCHC","	RDW-CV","	RDW-SD","	PLT","	MPV","	PDW","	PCT"]
-    
-        df = df[df[df.columns[0]].isin(hematology_params)]
-    
-        # ===============================
-        # TRANSFORM
-        # ===============================
-        df_long = df.melt(
-            id_vars=df.columns[0],
-            var_name="Sample",
-            value_name="Value"
-        )
-        df_long.columns = ["Parameter", "Sample", "Value"]
-    
-        df_long["Timepoint"] = label
-    
-        return df_long
+    # ===============================
+    # 🔥 FILTER PARAMETER HEMATOLOGI
+    # ===============================
+    hematology_params = ["	WBC","	Neu#","	Lym#","	Mon#","	Eos#","	Bas#","	Neu%","	Lym%","	Mon%","	Eos%","	Bas%","	RBC",
+                         "	HGB","	HCT","	MCV","	MCH","	MCHC","	RDW-CV","	RDW-SD","	PLT","	MPV","	PDW","	PCT"]
+
+    df = df[df[df.columns[0]].isin(hematology_params)]
+
+    # ===============================
+    # TRANSFORM
+    # ===============================
+    df_long = df.melt(
+        id_vars=df.columns[0],
+        var_name="Sample",
+        value_name="Value"
+    )
+    df_long.columns = ["Parameter", "Sample", "Value"]
+
+    df_long["Timepoint"] = label
+
+    return df_long
 
 # ===============================
 # LOAD ALL
