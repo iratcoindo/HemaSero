@@ -150,14 +150,19 @@ if len(df_list) > 0:
     st.write("Timepoints:", df_all["Timepoint"].unique())
 
     # ===============================
-    # SAFE BOXPLOT (NO POSITIONS)
+    # 📊 SAFE BOXPLOT
     # ===============================
+    df_param = df_all[df_all["Parameter"] == param]
+    
     box_data = []
     box_colors = []
     labels = []
     
-    for g in df_all["Group"].dropna().unique():
-        for tp in ["Baseline", "Midline", "Endline"]:
+    groups_unique = df_all["Group"].dropna().unique()
+    timepoints = ["Baseline", "Midline", "Endline"]
+    
+    for g in groups_unique:
+        for tp in timepoints:
     
             vals = df_param[
                 (df_param["Group"] == g) &
@@ -165,10 +170,13 @@ if len(df_list) > 0:
             ]["Value"].dropna()
     
             if len(vals) > 0:
-                box_data.append(vals)
-                box_colors.append(colors[tp])
-                labels.append(f"{g}-{tp}")
+                box_data.append(vals.values)  # 🔥 penting pakai .values
+                box_colors.append(colors.get(tp, "gray"))
+                labels.append(f"{g}\n{tp}")
     
+    # ===============================
+    # PLOT
+    # ===============================
     if len(box_data) > 0:
     
         fig, ax = plt.subplots(figsize=(2.5,2.5))
@@ -183,11 +191,18 @@ if len(df_list) > 0:
             patch.set_facecolor(color)
     
         ax.set_xticks(range(1, len(labels)+1))
-        ax.set_xticklabels(labels, rotation=45, fontsize=6)
+        ax.set_xticklabels(labels, fontsize=6)
     
         ax.set_title(param, fontsize=8)
+        ax.tick_params(axis='y', labelsize=6)
+    
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
     
         st.pyplot(fig)
+    
+    else:
+        st.warning(f"{param}: No data to plot")
    
 
 else:
