@@ -39,27 +39,27 @@ def load_data(file, label):
     # TRANSFORM
     # ===============================
     # ===============================
-# TRANSFORM KE LONG
-# ===============================
-df_long = df.melt(
-    id_vars=df.columns[0],
-    var_name="Sample",
-    value_name="Value"
-)
-
-df_long.columns = ["Parameter", "Sample", "Value"]
-
-# ===============================
-# 🔥 CLEAN VALUE
-# ===============================
-df_long["Value"] = pd.to_numeric(df_long["Value"], errors="coerce")
-
-# ===============================
-# ADD TIMEPOINT
-# ===============================
-df_long["Timepoint"] = label
-
-return df_long
+    # TRANSFORM KE LONG
+    # ===============================
+    df_long = df.melt(
+        id_vars=df.columns[0],
+        var_name="Sample",
+        value_name="Value"
+    )
+    
+    df_long.columns = ["Parameter", "Sample", "Value"]
+    
+    # ===============================
+    # 🔥 CLEAN VALUE
+    # ===============================
+    df_long["Value"] = pd.to_numeric(df_long["Value"], errors="coerce")
+    
+    # ===============================
+    # ADD TIMEPOINT
+    # ===============================
+    df_long["Timepoint"] = label
+    
+    return df_long
 
 # ===============================
 # LOAD ALL
