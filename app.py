@@ -26,7 +26,26 @@ def load_data(file, label):
     else:
         df = pd.read_csv(file)
 
-    # ubah ke long format
+    def load_data(file, label):
+    if file is None:
+        return None
+    
+    if file.name.endswith(".xlsx"):
+        df = pd.read_excel(file)
+    else:
+        df = pd.read_csv(file)
+
+    # ===============================
+    # 🔥 FILTER PARAMETER HEMATOLOGI
+    # ===============================
+    hematology_params = ["	WBC","	Neu#","	Lym#","	Mon#","	Eos#","	Bas#","	Neu%","	Lym%","	Mon%","	Eos%","	Bas%","	RBC",
+                         "	HGB","	HCT","	MCV","	MCH","	MCHC","	RDW-CV","	RDW-SD","	PLT","	MPV","	PDW","	PCT"]
+
+    df = df[df[df.columns[0]].isin(hematology_params)]
+
+    # ===============================
+    # TRANSFORM
+    # ===============================
     df_long = df.melt(
         id_vars=df.columns[0],
         var_name="Sample",
@@ -34,7 +53,6 @@ def load_data(file, label):
     )
     df_long.columns = ["Parameter", "Sample", "Value"]
 
-    # tambahkan timepoint
     df_long["Timepoint"] = label
 
     return df_long
