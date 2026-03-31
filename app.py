@@ -38,9 +38,6 @@ def load_data(file, label):
     df = df[df[df.columns[0]].isin(hematology_params)]
 
     # ===============================
-    # TRANSFORM
-    # ===============================
-    # ===============================
     # TRANSFORM KE LONG
     # ===============================
     df_long = df.melt(
@@ -84,35 +81,56 @@ if len(df_list) > 0:
     df_all = pd.concat(df_list, ignore_index=True)
 
     # ===============================
-    # 🧪 GROUP ASSIGNMENT
+    # 🧬 GROUP ASSIGNMENT (RANGE INPUT)
     # ===============================
     st.markdown("---")
-    st.subheader("🧬 Assign Sample Groups")
+    st.subheader("🧪 Assign Group by Range")
     
     unique_samples = sorted(df_all["Sample"].unique())
-    
     st.write("Detected samples:", unique_samples)
     
+    # fungsi parser
+    def parse_range(text):
+        samples = []
+        parts = text.split(",")
+    
+        for p in parts:
+            p = p.strip()
+            if "-" in p:
+                start, end = p.split("-")
+                samples += [str(i) for i in range(int(start), int(end)+1)]
+            elif p != "":
+                samples.append(p)
+        return samples
+    
     # jumlah group
-    n_group = st.number_input("Jumlah kelompok", min_value=1, max_value=10, value=2)
+    n_group = st.number_input("Jumlah kelompok", 1, 10, 2)
     
     group_map = {}
     
     for i in range(n_group):
-        col1, col2 = st.columns([1,3])
+        col1, col2 = st.columns(2)
     
         with col1:
-            group_name = st.text_input(f"Group {i+1} Name", f"Group {i+1}", key=f"gname{i}")
+            gname = st.text_input(f"Nama Group {i+1}", f"Group {i+1}", key=f"gname{i}")
     
         with col2:
-            selected_samples = st.multiselect(
-                f"Pilih sample untuk {group_name}",
-                unique_samples,
-                key=f"gsample{i}"
+            grange = st.text_input(
+                f"Range Sample (contoh: 1-5 atau 1-3,5,7-9)",
+                key=f"grange{i}"
             )
     
-        for s in selected_samples:
-            group_map[s] = group_name
+        try:
+            parsed = parse_range(grange)
+    
+            for p in parsed:
+                # 🔥 cocokkan dengan sample name
+                for s in unique_samples:
+                    if s.endswith(str(p)):   # fleksibel (S1, ID_1, dll)
+                        group_map[s] = gname
+    
+        except:
+            st.warning(f"Format salah di Group {i+1}")
     
     # ===============================
     # APPLY GROUP
@@ -122,8 +140,8 @@ if len(df_list) > 0:
     # ===============================
     # PREVIEW
     # ===============================
-    st.subheader("📋 Grouped Data")
-    st.dataframe(df_all)
+    st.subheader("📋 Group Mapping")
+    st.dataframe(df_all[["Sample","Group"]].drop_duplicates())
 
     # ===============================
     # INFO DETECTION
