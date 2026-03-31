@@ -266,8 +266,8 @@ if len(df_list) > 0:
                     low, high = range_dict.get(param, (None, None))
 
                     if low is not None and high is not None:
-                        ax.axhline(low, linestyle="--", linewidth=1,col=red)
-                        ax.axhline(high, linestyle="--", linewidth=1,col=red)
+                        ax.axhline(low, linestyle="--", linewidth=1,col="red")
+                        ax.axhline(high, linestyle="--", linewidth=1,col="red")
     
                     # warna berdasarkan waktu
                     for patch, color in zip(bp["boxes"], box_colors):
