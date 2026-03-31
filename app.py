@@ -95,58 +95,58 @@ if len(df_list) > 0:
     st.write("Jumlah parameter:", df_all["Parameter"].nunique())
     st.write("Timepoints:", df_all["Timepoint"].unique())
 
-# ===============================
-# 📊 MINI BOXPLOT PER PARAMETER
-# ===============================
-st.markdown("---")
-st.subheader("📦 Hematology Boxplot (Per Parameter)")
-
-parameters = df_all["Parameter"].unique()
-
-# jumlah kolom per baris
-cols_per_row = 6
-
-for i in range(0, len(parameters), cols_per_row):
-
-    subset_params = parameters[i:i+cols_per_row]
-
-    cols = st.columns(len(subset_params))
-
-    for j, param in enumerate(subset_params):
-
-        with cols[j]:
-
-            df_param = df_all[df_all["Parameter"] == param]
-
-            # ambil per timepoint
-            groups = []
-            labels = []
-
-            for tp in ["Baseline", "Midline", "Endline"]:
-                vals = df_param[df_param["Timepoint"] == tp]["Value"].dropna()
-                if len(vals) > 0:
-                    groups.append(vals)
-                    labels.append(tp)
-
-            # skip kalau kosong
-            if len(groups) == 0:
-                st.write(f"{param} (No data)")
-                continue
-
-            # plot kecil
-            fig, ax = plt.subplots(figsize=(2,2))
-
-            ax.boxplot(groups, labels=labels)
-
-            ax.set_title(param, fontsize=8)
-            ax.tick_params(axis='x', labelrotation=45, labelsize=6)
-            ax.tick_params(axis='y', labelsize=6)
-
-            # minimal styling
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-
-            st.pyplot(fig)
+    # ===============================
+    # 📊 MINI BOXPLOT PER PARAMETER
+    # ===============================
+    st.markdown("---")
+    st.subheader("📦 Hematology Boxplot (Per Parameter)")
+    
+    parameters = df_all["Parameter"].unique()
+    
+    # jumlah kolom per baris
+    cols_per_row = 6
+    
+    for i in range(0, len(parameters), cols_per_row):
+    
+        subset_params = parameters[i:i+cols_per_row]
+    
+        cols = st.columns(len(subset_params))
+    
+        for j, param in enumerate(subset_params):
+    
+            with cols[j]:
+    
+                df_param = df_all[df_all["Parameter"] == param]
+    
+                # ambil per timepoint
+                groups = []
+                labels = []
+    
+                for tp in ["Baseline", "Midline", "Endline"]:
+                    vals = df_param[df_param["Timepoint"] == tp]["Value"].dropna()
+                    if len(vals) > 0:
+                        groups.append(vals)
+                        labels.append(tp)
+    
+                # skip kalau kosong
+                if len(groups) == 0:
+                    st.write(f"{param} (No data)")
+                    continue
+    
+                # plot kecil
+                fig, ax = plt.subplots(figsize=(2,2))
+    
+                ax.boxplot(groups, labels=labels)
+    
+                ax.set_title(param, fontsize=8)
+                ax.tick_params(axis='x', labelrotation=45, labelsize=6)
+                ax.tick_params(axis='y', labelsize=6)
+    
+                # minimal styling
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+    
+                st.pyplot(fig)
 
 else:
     st.info("Silakan upload minimal data baseline")
