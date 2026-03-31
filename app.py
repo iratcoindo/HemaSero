@@ -190,26 +190,26 @@ if len(df_list) > 0:
                 positions = []
                 box_data = []
                 box_colors = []
-                
+    
                 pos = 0
-                
+    
                 for g in groups_unique:
-                
+    
                     for tp in timepoints:
-                
+    
                         vals = df_param[
                             (df_param["Group"] == g) &
                             (df_param["Timepoint"] == tp)
                         ]["Value"].dropna()
-                
+    
                         if len(vals) > 0:
                             box_data.append(vals)
                             positions.append(pos)
                             box_colors.append(colors[tp])
-                
+    
                             pos += 1
-                
-                    pos += 1
+    
+                    pos += 1  # jarak antar group
     
                 # plot
                 bp = ax.boxplot(
